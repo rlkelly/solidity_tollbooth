@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { keccak256 } from 'js-sha3';
 import { inject, observer } from 'mobx-react'
 
 import TollBoothOperator from '../build/contracts/TollBoothOperator.json'
@@ -6,6 +7,7 @@ import TollBoothOperator from '../build/contracts/TollBoothOperator.json'
 import SetVehicle from './Components/SetVehicle'
 import SetOperator from './Components/SetOperator'
 import EnterRoad from './Components/EnterRoad'
+import SecretPhrase from './Components/SecretPhrase'
 
 
 @inject('store') @observer
@@ -25,6 +27,7 @@ class VehiclePage extends Component {
         this.getBalance = this.getBalance.bind(this);
         this.setOperator = this.setOperator.bind(this);
         this.enterRoad = this.enterRoad.bind(this);
+        this.getSecretHash = this.getSecretHash.bind(this);
     }
 
     setOperator(address) {
@@ -48,6 +51,18 @@ class VehiclePage extends Component {
       this.props.store.drivingHistory = [];
       this.props.store.vehicle = vehicle;
       this.getBalance(vehicle);
+    }
+
+    getSecretHash(phrase) {
+        if (!this.props.store.operator) {
+          alert('need to set operator');
+          return
+        }
+        alert(keccak256(phrase));
+        console.log(keccak256(phrase));
+        // this.props.store.operator.hashSecret(phrase, {from: this.props.store.vehicle}).then(result => {
+        //   console.log(result)
+        // })
     }
 
     enterRoad(booth, secretHashed, amount) {
@@ -82,6 +97,8 @@ class VehiclePage extends Component {
 
           <SetVehicle setVehicle={this.setVehicle} />
           <div> Vehicle: {this.props.store.vehicle} Balance: {this.props.store.vehicleBalance}</div>
+
+          <SecretPhrase getSecret={this.getSecretHash} />
 
           <EnterRoad enterRoad={this.enterRoad} />
 
