@@ -36,12 +36,18 @@ class TollBoothPage extends Component {
     }
 
     setTollBooth(tollbooth) {
+      console.log(tollbooth);
       this.props.store.currentTollbooth = tollbooth;
     }
 
     reportExitRoad(exitSecretClear) {
       if (!this.state.operator) {
         alert('need to set operator');
+        return
+      }
+      if (!this.props.store.currentTollbooth) {
+        alert('need a current tollbooth')
+        return
       }
       this.state.operator.reportExitRoad(exitSecretClear, {from: this.props.store.currentTollbooth}).then(tx => {
         const logExited = tx.logs[0];

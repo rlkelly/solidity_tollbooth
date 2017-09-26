@@ -42,11 +42,17 @@ class Header extends Component {
       currentOperator = <div> CURRENT OPERATOR: {this.props.store.operatorAddress} </div>
     } else { currentOperator = <div /> }
 
+    let currentTollbooth;
+    if (this.props.store.currentTollbooth) {
+      currentTollbooth = <div> CURRENT TOLLBOOTH: {this.props.store.currentTollbooth} </div>
+    } else { currentTollbooth = <div /> }
+
     return (
       <header>
         <nav>
           <div> CURRENT REGULATOR: {this.props.store.regulatorAddress} </div>
           {currentOperator}
+          {currentTollbooth}
           <ul>
             <li><Link to='/'>Home</Link></li>
             <li><Link to='/app'>Regulator</Link></li>

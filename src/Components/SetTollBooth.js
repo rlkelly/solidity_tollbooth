@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
+import { inject, observer } from 'mobx-react'
 
-
+@inject('store') @observer
 class SetTollBooth extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      address: '',
+      tollbooth: this.props.store.tollbooths[0],
     }
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -14,16 +15,24 @@ class SetTollBooth extends Component {
 
   handleChange(event) {
     this.setState({
-      [event.target.name]: event.target.value
+      tollbooth: event.target.value
     })
   }
 
   handleSubmit(event) {
     event.preventDefault();
-    this.props.setTollBooth(this.state.address)
+    this.props.setTollBooth(this.state.tollbooth)
   }
 
   render() {
+    let selector;
+    if (this.props.store.tollbooths) {
+      selector = <select name="tollbooth" onChange={this.handleChange}> {this.props.store.tollbooths.map((x, i) =>
+          <option key={i} value={x}> {x} </option>)}
+      </select>
+    } else {
+      selector = <select />
+    }
 
     return (
       <div>
@@ -31,7 +40,7 @@ class SetTollBooth extends Component {
           <form onSubmit={this.handleSubmit}>
               <label>
                 TollBooth Address:
-                <input type="text" name="address" value={this.state.address} onChange={this.handleChange} />
+                {selector}
               </label>
             <input type="submit" value="Submit" />
           </form>

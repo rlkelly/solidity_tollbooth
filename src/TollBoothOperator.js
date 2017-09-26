@@ -44,6 +44,7 @@ class TollBoothOperatorPage extends Component {
     console.log(address)
     if (!this.props.store.operator) {
       alert('add operator first');
+      return
     }
     this.props.store.operator.addTollBooth(address, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
       console.log(tx);
@@ -56,6 +57,7 @@ class TollBoothOperatorPage extends Component {
     console.log(tollbooth1, tollbooth2, price, this.props.store.operatorAddress)
     if (!this.props.store.operatorAddress) {
       alert('add operator first');
+      return
     }
     this.props.store.operator.setRoutePrice(tollbooth1, tollbooth2, price, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
       console.log(tx);
@@ -69,6 +71,7 @@ class TollBoothOperatorPage extends Component {
     console.log(vehicleType, multiplier, this.props.store.operatorAddress)
     if (!this.props.store.operatorAddress) {
       alert('add operator first');
+      return
     }
     this.props.store.operator.setMultiplier(vehicleType, multiplier, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
       console.log(tx);
