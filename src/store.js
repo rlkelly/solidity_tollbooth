@@ -12,6 +12,7 @@ class ProjectStore {
   @observable regulator;
   @observable drivingHistory = [];
   @observable vehicle;
+  @observable oldVehicle = {};
   @observable vehicleBalance;
   @observable regulatorAddress;
   @observable tollbooths = [];
@@ -19,6 +20,7 @@ class ProjectStore {
   @observable currentOperator = {address: null, deposit: null};
   @observable defaultGas = 3000000;
   @observable currentTollboothOperator;
+  @observable exitMapping = {};
   @observable web3 = getWeb3.then(results => results.web3)
                             .catch(_ => console.log('Error finding web3.'))
 }

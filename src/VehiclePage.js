@@ -48,7 +48,12 @@ class VehiclePage extends Component {
     }
 
     setVehicle(vehicle) {
-      this.props.store.drivingHistory = [];
+      this.props.store.oldVehicle[this.props.store.vehicle] = this.props.store.drivingHistory;
+      if (this.props.store.oldVehicle[vehicle]) {
+        this.props.store.drivingHistory = this.props.store.oldVehicle[vehicle]
+      } else {
+        this.props.store.drivingHistory = [];        
+      }
       this.props.store.vehicle = vehicle;
       this.getBalance(vehicle);
     }
@@ -74,6 +79,7 @@ class VehiclePage extends Component {
       this.props.store.operator.enterRoad(booth, secretHashed, {from: this.props.store.vehicle, amount}).then(tx => {
         console.log(tx);
         this.props.store.drivingHistory.push({booth, secretHashed, amount});
+        this.props.store.exitMapping[secretHashed] = this.props.store.vehicle;
 
       }).catch((err) => {
         console.log(err)

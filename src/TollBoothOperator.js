@@ -73,7 +73,7 @@ class TollBoothOperatorPage extends Component {
       alert('add operator first');
       return
     }
-    var event = this.props.store.operator.setMultiplier(vehicleType, multiplier, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
+    this.props.store.operator.setMultiplier(vehicleType, multiplier, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
       console.log(tx);
       this.setState(previousState => ({
           multipliers: [...previousState.multipliers.filter(x => x !== {vehicleType, multiplier}), {vehicleType, multiplier}]
