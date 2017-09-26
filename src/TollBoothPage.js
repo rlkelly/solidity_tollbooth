@@ -50,16 +50,16 @@ class TollBoothPage extends Component {
         return
       }
       this.props.store.operator.reportExitRoad(exitSecretClear, {from: this.props.store.currentTollbooth}).then(tx => {
-        console.log(tx)
-        // if (logExited.event === "LogPendingPayment") {
-        //   this.setState(previousState => ({
-        //       history: [...previousState.history, {exitSecretClear, finalFee: 'pending', refund: 'UNK'}]
-        //   }));
-        // } else if (logExited.event === "LogRoadExited") {
-        //   let finalFee = logExited.args.finalFee.toNumber()
-        //   let refund = logExited.args.refundWeis.toNumber()
-        //   this.props.store.history.push({exitSecretClear, finalFee, refund})
-        // }
+        const logExited = tx.logs[0];
+        if (logExited.event === "LogPendingPayment") {
+          this.setState(previousState => ({
+              history: [...previousState.history, {exitSecretClear, finalFee: 'pending', refund: 'UNK'}]
+          }));
+        } else if (logExited.event === "LogRoadExited") {
+          let finalFee = logExited.args.finalFee.toNumber()
+          let refund = logExited.args.refundWeis.toNumber()
+          this.props.store.history.push({exitSecretClear, finalFee, refund})
+        }
 
       }).catch((err) => {
         console.log(err)
