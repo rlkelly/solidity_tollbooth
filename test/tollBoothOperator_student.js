@@ -98,9 +98,13 @@ contract('TollBoothOperator', function(accounts) {
             it("should be possible to enter road with more than required deposit", function() {
                 return operator.enterRoad.call(
                         booth0, hashed0, { from: vehicle0, value: (deposit0 * multiplier0) + 1 })
-                    .then(success => assert.isTrue(success))
-                    .then(() => operator.enterRoad(
-                        booth0, hashed0, { from: vehicle0, value: (deposit0 * multiplier0) + 1 }))
+                    .then(success => {
+                      return assert.isTrue(success)
+                    })
+                    .then(() => {
+                      return operator.enterRoad(
+                        booth0, hashed0, { from: vehicle0, value: (deposit0 * multiplier0) + 1 })
+                    })
                     .then(tx => {
                         assert.strictEqual(tx.receipt.logs.length, 1);
                         assert.strictEqual(tx.logs.length, 1);
@@ -128,6 +132,7 @@ contract('TollBoothOperator', function(accounts) {
 
             const extraDeposit = randomIntIn(1, 1000);
             const extraPrice = extraDeposit + randomIntIn(1, 1000);
+            console.log(vehicle0, 'vehicle0');
             let vehicleInitBal;
 
             beforeEach("should enter road with excessive deposit", function() {
@@ -139,8 +144,12 @@ contract('TollBoothOperator', function(accounts) {
 
             it("should be possible to report exit road on route with known price below deposited", function() {
                 return operator.setRoutePrice(booth0, booth1, deposit0, { from: owner1 })
-                    .then(tx => operator.reportExitRoad.call(secret0, { from: booth1 }))
-                    .then(result => assert.strictEqual(result.toNumber(), 1))
+                    .then(tx => {
+                      return operator.reportExitRoad.call(secret0, { from: booth1 })
+                    })
+                    .then(result => {
+                      assert.strictEqual(result.toNumber(), 1)
+                    })
                     .then(() => operator.reportExitRoad(secret0, { from: booth1 }))
                     .then(tx => {
                         assert.strictEqual(tx.receipt.logs.length, 1);
@@ -301,6 +310,7 @@ contract('TollBoothOperator', function(accounts) {
                     return operator.setRoutePrice(booth0, booth2, deposit0, { from: owner1 })
                         .then(tx => operator.clearSomePendingPayments.call(booth0, booth2, 1, { from: owner0 }))
                         .then(success => assert.isTrue(success))
+                        .then(() => console.log('part1'))
                         .then(() => operator.clearSomePendingPayments(booth0, booth2, 1, { from: owner0 }))
                         .then(tx => {
                             assert.strictEqual(tx.receipt.logs.length, 1);

@@ -1,17 +1,18 @@
 import React, { Component } from 'react'
-import TollBoothOperator from '../build/contracts/TollBoothOperator.json'
+import { inject, observer } from 'mobx-react'
 
-import getWeb3 from './utils/getWeb3'
+import TollBoothOperator from '../build/contracts/TollBoothOperator.json'
 import SetOperator from './Components/SetOperator'
 import SetTollBooth from './Components/SetTollBooth'
+import ExitRoad from './Components/ExitRoad'
 
 
-
+@inject('store') @observer
 class TollBoothPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          web3: null,
+          web3: this.props.store.web3,
           operatorAddress: null,
           operator: null,
           history: [],
@@ -20,56 +21,35 @@ class TollBoothPage extends Component {
 
         this.setOperator = this.setOperator.bind(this);
         this.setTollBooth = this.setTollBooth.bind(this);
-    }
-
-    componentWillMount() {
-      // Get network provider and web3 instance.
-      // See utils/getWeb3 for more info.
-
-      getWeb3
-      .then(results => {
-        this.setState({
-          web3: results.web3
-        })
-
-        // Instantiate contract once web3 provided.
-        // this.instantiateContract()
-      })
-      .catch(() => {
-        console.log('Error finding web3.')
-      })
+        this.reportExitRoad = this.reportExitRoad.bind(this);
     }
 
     setOperator(address) {
       const contract = require('truffle-contract')
       const tollboothOperator = contract(TollBoothOperator)
-      tollboothOperator.setProvider(this.state.web3.currentProvider)
-      let tollboothOperatorInstance
-
-      let operator = tollboothOperator.at(address);
-      this.setState({
-        operatorAddress: address,
-        operator
+      this.props.store.web3.then(web3 => {
+        tollboothOperator.setProvider(web3.currentProvider)
+        let operator = tollboothOperator.at(address);
+        this.props.store.operator = operator;
+        this.props.store.operatorAddress = address;
       })
     }
 
     setTollBooth(tollbooth) {
-      this.setState({
-        tollbooth,
-      })
+      this.props.store.currentTollbooth = tollbooth;
     }
 
     reportExitRoad(exitSecretClear) {
       if (!this.state.operator) {
         alert('need to set operator');
       }
-      this.state.operator.reportExitRoad(exitSecretClear, {from: this.state.tollbooth}).then(tx => {
+      this.state.operator.reportExitRoad(exitSecretClear, {from: this.props.store.currentTollbooth}).then(tx => {
         const logExited = tx.logs[0];
-        if (logExited.event == "LogPendingPayment") {
+        if (logExited.event === "LogPendingPayment") {
           this.setState(previousState => ({
               history: [...previousState.history, {exitSecretClear, finalFee: 'pending', refund: 'UNK'}]
           }));
-        } else if (logExited.event == "LogRoadExited") {
+        } else if (logExited.event === "LogRoadExited") {
           let finalFee = logExited.args.finalFee.toNumber()
           let refund = logExited.args.refundWeis.toNumber()
           this.setState(previousState => ({
@@ -92,11 +72,16 @@ class TollBoothPage extends Component {
 
       return (
         <div>
+
+          <div> regulator: {this.props.store.regulatorAddress} </div>
+
           <SetOperator setOperator={this.setOperator} />
           <div> Operator: {this.state.operator} </div>
 
           <SetTollBooth setTollBooth={this.setTollBooth} />
-          <div> tollbooth: {this.state.tollbooth} </div>
+          <div> tollbooth: {this.props.store.currentTollbooth} </div>
+
+          <ExitRoad exitRoad={this.reportExitRoad} />
 
           <h1> HISTORY </h1>
           { history }

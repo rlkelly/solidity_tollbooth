@@ -35,7 +35,7 @@ contract('Owned inheritance tree', function(accounts) {
     });
 
     Object.keys(constructors).forEach(name => {
-        
+
         describe(name, function() {
 
             beforeEach("should deploy a new " + name, function() {

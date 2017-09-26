@@ -1,31 +1,23 @@
 import React, { Component } from 'react'
+import { inject, observer } from 'mobx-react'
 
-
+@inject('store') @observer
 class OperatorCreator extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      storageValue: 0,
-      deposit: '',
-      owner: '',
-      regulator: this.props.regulator,
+      deposit: 0,
+      owner: 0x0,
     }
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.createNewOperator = this.createNewOperator.bind(this);
   }
 
   componentWillReceiveProps() {
     this.setState({
-      otherAccounts: this.props.otherAccounts
+      owner: this.props.store.accounts[0],
     })
-  }
-
-  createNewOperator() {
-    let operator;
-    const regulatorInstance = this.props.regulator;
-    this.props.createAccount(this.state.owner, this.state.deposit)
   }
 
   handleChange(event) {
@@ -34,16 +26,22 @@ class OperatorCreator extends Component {
     })
   }
 
+  componentWillMount() {
+    this.setState({
+      owner: this.props.store.accounts[0],
+    })
+  }
+
   handleSubmit(event) {
     event.preventDefault();
-    this.createNewOperator();
+    this.props.createAccount(this.state.owner, this.state.deposit)
   }
 
 
   render() {
     let selector;
-    if (this.state.otherAccounts) {
-      selector = <select name="owner" value={this.state.owner} onChange={this.handleChange}> {this.state.otherAccounts.map((x, i) =>
+    if (this.props.store.accounts) {
+      selector = <select name="owner" value={this.state.owner} onChange={this.handleChange}> {this.props.store.accounts.map((x, i) =>
           <option key={i} value={x}> {x} </option>)}
       </select>
     } else {

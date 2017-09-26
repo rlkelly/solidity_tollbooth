@@ -1,78 +1,63 @@
 import React, { Component } from 'react'
-import Regulator from '../build/contracts/Regulator.json'
+import { inject, observer } from 'mobx-react'
+
 import TollBoothOperator from '../build/contracts/TollBoothOperator.json'
-import getWeb3 from './utils/getWeb3'
 import SetOperator from './Components/SetOperator'
 import AddTollBooth from './Components/AddTollBooth'
 import RoutePriceSetter from './Components/RoutePriceSetter'
 import SetMultiplier from './Components/SetMultiplier'
 
 
+@inject('store') @observer
 class TollBoothOperatorPage extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
       operatorAddress: '',
-      operator: null,
-      web3: null,
+      operator: this.props.store.operator,
+      web3: this.props.store.web3,
       tollbooths: [],
       prices: [],
       multipliers: [],
+      regulator: this.props.store.regulator,
     }
 
     this.setOperator = this.setOperator.bind(this);
     this.addTollBooth = this.addTollBooth.bind(this);
     this.setRoutePrice = this.setRoutePrice.bind(this);
-  }
-  componentWillMount() {
-    // Get network provider and web3 instance.
-    // See utils/getWeb3 for more info.
-
-    getWeb3
-    .then(results => {
-      this.setState({
-        web3: results.web3
-      })
-
-      // Instantiate contract once web3 provided.
-      this.instantiateContract()
-    })
-    .catch(() => {
-      console.log('Error finding web3.')
-    })
+    this.setMultiplier = this.setMultiplier.bind(this);
   }
 
   setOperator(address) {
     const contract = require('truffle-contract')
     const tollboothOperator = contract(TollBoothOperator)
-    tollboothOperator.setProvider(this.state.web3.currentProvider)
-    let tollboothOperatorInstance
-
-    let operator = tollboothOperator.at(address);
-    this.setState({
-      operatorAddress: address,
-      operator
+    this.props.store.web3.then(web3 => {
+      tollboothOperator.setProvider(web3.currentProvider)
+      let operator = tollboothOperator.at(address);
+      this.props.store.operator = operator;
+      this.props.store.operatorAddress = address;
     })
   }
 
   addTollBooth(address) {
-    if (!this.state.operator) {
+    console.log(address)
+    if (!this.props.store.operator) {
       alert('add operator first');
     }
-    this.state.operator.addTollBooth(address, {from: this.state.operatorAddress, gas: 300000}).then(tx => {
+    this.props.store.operator.addTollBooth(address, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
       console.log(tx);
-      this.setState(previousState => ({
-          tollbooths: [...previousState.tollbooths.filter(x => x !== address), address]
-      }));
+      this.props.store.tollbooths = this.props.store.tollbooths.filter(x => x !== address);
+      this.props.store.tollbooths.push(address);
     })
   }
 
   setRoutePrice(tollbooth1, tollbooth2, price) {
-    if (!this.state.operator) {
+    console.log(tollbooth1, tollbooth2, price, this.props.store.operatorAddress)
+    if (!this.props.store.operatorAddress) {
       alert('add operator first');
     }
-    this.state.operator.setRoutePrice(tollbooth1, tollbooth2, price, {from: this.state.operatorAddress, gas: 300000}).then(tx => {
+    this.props.store.operator.setRoutePrice(tollbooth1, tollbooth2, price, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
       console.log(tx);
       this.setState(previousState => ({
           prices: [...previousState.prices.filter(x => x !== {tollbooth1, tollbooth2, price}), {tollbooth1, tollbooth2, price}]
@@ -81,10 +66,11 @@ class TollBoothOperatorPage extends Component {
   }
 
   setMultiplier(vehicleType, multiplier) {
-    if (!this.state.operator) {
+    console.log(vehicleType, multiplier, this.props.store.operatorAddress)
+    if (!this.props.store.operatorAddress) {
       alert('add operator first');
     }
-    this.state.operator.setRoutePrice(vehicleType, multiplier, {from: this.state.operatorAddress, gas: 300000}).then(tx => {
+    this.props.store.operator.setMultiplier(vehicleType, multiplier, {from: this.props.store.operatorAddress, gas: 300000}).then(tx => {
       console.log(tx);
       this.setState(previousState => ({
           multipliers: [...previousState.multipliers.filter(x => x !== {vehicleType, multiplier}), {vehicleType, multiplier}]
@@ -94,8 +80,8 @@ class TollBoothOperatorPage extends Component {
 
   render() {
     let tollboothsList;
-    if (this.state.tollbooths) {
-        tollboothsList = this.state.tollbooths.map((x, i) => <li key={i}> {x} </li>)
+    if (this.props.store.tollbooths) {
+        tollboothsList = this.props.store.tollbooths.map((x, i) => <li key={i}> {x} </li>)
     } else {
       tollboothsList = <div />
     }
@@ -113,9 +99,13 @@ class TollBoothOperatorPage extends Component {
       multipliers = <div />
     }
 
+    let existingOperators = this.props.store.operators.map((x, ix) => <div key={ix}> {x.address} </div> )
+
     return(
 
       <div>
+          <div> existing operators: {existingOperators} </div>
+
           <SetOperator setOperator={this.setOperator} />
           <div> Operator address: {this.state.operatorAddress} </div>
 

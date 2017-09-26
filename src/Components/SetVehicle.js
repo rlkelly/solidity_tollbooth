@@ -1,16 +1,31 @@
 import React, { Component } from 'react'
+import { inject, observer } from 'mobx-react'
 
-
+@inject('store') @observer
 class SetVehicle extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      address: '',
+      accounts: this.props.store.accounts,
     }
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+  componentWillMount() {
+    this.setState({
+      vehicle: this.props.store.accounts[0],
+      accounts: this.props.store.accounts,
+    })
+  }
+
+  componentWillReceiveProps() {
+    this.setState({
+      vehicle: this.props.store.accounts[0],
+      accounts: this.props.store.accounts,
+    })
+  }
+
 
   handleChange(event) {
     this.setState({
@@ -20,10 +35,18 @@ class SetVehicle extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.props.setVehicle(this.state.address)
+    this.props.setVehicle(this.state.vehicle)
   }
 
   render() {
+    let selector;
+    if (this.props.store.accounts) {
+      selector = <select name="vehicle" value={this.state.vehicle} onChange={this.handleChange}> {this.props.store.accounts.map((x, i) =>
+          <option key={i} value={x}> {x} </option>)}
+      </select>
+    } else {
+      selector = <select />
+    }
 
     return (
       <div>
@@ -31,7 +54,7 @@ class SetVehicle extends Component {
           <form onSubmit={this.handleSubmit}>
               <label>
                 Vehicle Address:
-                <input type="text" name="address" value={this.state.address} onChange={this.handleChange} />
+                {selector}
               </label>
             <input type="submit" value="Submit" />
           </form>

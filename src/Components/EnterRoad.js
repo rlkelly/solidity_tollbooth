@@ -22,7 +22,7 @@ class EnterRoad extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.props.enterRoad(this.state.tollbooth)
+    this.props.enterRoad(this.state.tollbooth, this.state.secretHashed, this.state.deposit)
   }
 
 
@@ -36,12 +36,10 @@ class EnterRoad extends Component {
                   Tollbooth Address:
                   <input type="text" name="tollbooth" value={this.state.tollbooth} onChange={this.handleChange} />
                 </label>
-                <input type="submit" value="Submit" />
                 <label>
                   Secret Hashed:
                   <input type="text" name="secretHashed" value={this.state.secretHashed} onChange={this.handleChange} />
                 </label>
-                <input type="submit" value="Submit" />
                 <label>
                   Deposit:
                   <input type="number" name="deposit" value={this.state.deposit} onChange={this.handleChange} />

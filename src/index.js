@@ -1,17 +1,19 @@
-import React from 'react'
+import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
-import RegulatorPage from './Regulator'
-import TollBoothOperatorPage from './TollBoothOperator'
-import VehiclePage from './VehiclePage'
-import projectStore from './store'
-import TollBoothPage from './TollBoothPage'
-
 import {
   HashRouter,
   Switch,
   Route,
   Link
 } from 'react-router-dom';
+
+import RegulatorPage from './Regulator'
+import TollBoothOperatorPage from './TollBoothOperator'
+import VehiclePage from './VehiclePage'
+import TollBoothPage from './TollBoothPage'
+import { Provider, observer, inject } from 'mobx-react'
+import projectStore from './store'
+
 
 const Home = () => (
   <div>
@@ -31,21 +33,32 @@ const Main = () => (
   </main>
 )
 
-// The Header creates links that can be used to navigate
-// between routes.
-const Header = () => (
-  <header>
-    <nav>
-      <ul>
-        <li><Link to='/'>Home</Link></li>
-        <li><Link to='/app'>Regulator</Link></li>
-        <li><Link to='/tb'>TollBooth Operator</Link></li>
-        <li><Link to='/vehicle'>Vehicle</Link></li>
-        <li><Link to='/tollbooth'>TollBooth</Link></li>
-      </ul>
-    </nav>
-  </header>
-)
+
+@inject('store') @observer
+class Header extends Component {
+  render() {
+    let currentOperator;
+    if (this.props.store.currentOperator.address) {
+      currentOperator = <div> CURRENT OPERATOR: {this.props.store.operatorAddress} </div>
+    } else { currentOperator = <div /> }
+
+    return (
+      <header>
+        <nav>
+          <div> CURRENT REGULATOR: {this.props.store.regulatorAddress} </div>
+          {currentOperator}
+          <ul>
+            <li><Link to='/'>Home</Link></li>
+            <li><Link to='/app'>Regulator</Link></li>
+            <li><Link to='/tb'>TollBooth Operator</Link></li>
+            <li><Link to='/vehicle'>Vehicle</Link></li>
+            <li><Link to='/tollbooth'>TollBooth</Link></li>
+          </ul>
+        </nav>
+      </header>
+    )
+  }
+}
 
 const MyApp = () => (
   <div>
@@ -55,8 +68,10 @@ const MyApp = () => (
 )
 
 ReactDOM.render(
-  <HashRouter>
+  <Provider store={projectStore}>
+    <HashRouter>
       <MyApp/>
-  </HashRouter>,
+    </HashRouter>
+  </Provider>,
   document.getElementById('root')
 );

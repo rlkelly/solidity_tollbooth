@@ -22,7 +22,7 @@ class RoutePriceSetter extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.props.setRoutePrice(this.state.tollbooth1, this.state.tollbooth2, this.state.price)
+    this.props.setRoutePrice(this.state.tollbooth1, this.state.tollbooth2, this.state.cost)
   }
 
 

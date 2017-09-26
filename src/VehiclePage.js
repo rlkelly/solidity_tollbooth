@@ -1,22 +1,23 @@
 import React, { Component } from 'react'
+import { inject, observer } from 'mobx-react'
+
 import TollBoothOperator from '../build/contracts/TollBoothOperator.json'
 
-import getWeb3 from './utils/getWeb3'
 import SetVehicle from './Components/SetVehicle'
 import SetOperator from './Components/SetOperator'
 import EnterRoad from './Components/EnterRoad'
 
 
-
+@inject('store') @observer
 class VehiclePage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          web3: null,
+          web3: this.props.store.web3,
           vehicle: null,
           balance: null,
-          operatorAddress: null,
-          operator: null,
+          operatorAddress: this.props.store.operatorAddress,
+          operator: this.props.store.operator,
           history: [],
         }
 
@@ -26,61 +27,41 @@ class VehiclePage extends Component {
         this.enterRoad = this.enterRoad.bind(this);
     }
 
-    componentWillMount() {
-      // Get network provider and web3 instance.
-      // See utils/getWeb3 for more info.
-
-      getWeb3
-      .then(results => {
-        this.setState({
-          web3: results.web3
-        })
-
-        // Instantiate contract once web3 provided.
-        // this.instantiateContract()
-      })
-      .catch(() => {
-        console.log('Error finding web3.')
-      })
-    }
-
     setOperator(address) {
       const contract = require('truffle-contract')
       const tollboothOperator = contract(TollBoothOperator)
-      tollboothOperator.setProvider(this.state.web3.currentProvider)
-      let tollboothOperatorInstance
-
-      let operator = tollboothOperator.at(address);
-      this.setState({
-        operatorAddress: address,
-        operator
+      this.props.store.web3.then(web3 => {
+        tollboothOperator.setProvider(web3.currentProvider)
+        let operator = tollboothOperator.at(address);
+        this.props.store.operator = operator;
+        this.props.store.operatorAddress = address;
       })
     }
 
     getBalance(account) {
-       this.setState({
-         balance: this.state.web3.eth.getBalance(account).toNumber()
-       })
+      this.props.store.web3.then(web3 => {
+          this.props.store.vehicleBalance = web3.eth.getBalance(account).toNumber()
+      })
     }
 
     setVehicle(vehicle) {
-      this.setState({
-        vehicle,
-      })
+      this.props.store.drivingHistory = [];
+      this.props.store.vehicle = vehicle;
       this.getBalance(vehicle);
     }
 
     enterRoad(booth, secretHashed, amount) {
-      if (!this.state.operator) {
+      console.log(booth, secretHashed, amount, this.props.store.vehicle)
+      if (!this.props.store.operator) {
         alert('need to set operator');
+        return
       }
-      this.state.operator.enterRoad(booth, secretHashed, {from: this.state.vehicle, amount}).then(tx => {
+      this.props.store.operator.enterRoad(booth, secretHashed, {from: this.props.store.vehicle, amount}).then(tx => {
         console.log(tx);
-        this.setState(previousState => ({
-            history: [...previousState.history, {booth, secretHashed, amount, entry: true}]
-        }));
+        this.props.store.drivingHistory.push({booth, secretHashed, amount});
 
       }).catch((err) => {
+        console.log(err)
         alert('error in making deposit')
       })
     }
@@ -88,19 +69,19 @@ class VehiclePage extends Component {
     render() {
 
       let history;
-      if (this.state.history) {
-        history = <div> {this.state.history.map((x, i) => <div>booth: {x.booth} entry: {x.entry} deposit: {x.deposit} </div> )}</div>
+      if (this.props.store.drivingHistory) {
+        history = <div> {this.props.store.drivingHistory.map((x, ix) => <div key={ix}>booth: {x.booth} secretHashed: {x.secretHashed} deposit: {x.amount} </div> )}</div>
       } else {
         history = <div />
       }
 
       return (
         <div>
+
           <SetOperator setOperator={this.setOperator} />
-          <div> Operator: {this.state.operator} </div>
 
           <SetVehicle setVehicle={this.setVehicle} />
-          <div> Vehicle: {this.state.vehicle} Balance: {this.state.balance}</div>
+          <div> Vehicle: {this.props.store.vehicle} Balance: {this.props.store.vehicleBalance}</div>
 
           <EnterRoad enterRoad={this.enterRoad} />
 
