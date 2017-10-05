@@ -35,6 +35,7 @@ contract Regulator is RegulatorI, Owned {
         public
         fromOwner
         returns(TollBoothOperatorI newOperator) {
+            require(owner != getOwner())
             TollBoothOperator myOperator = new TollBoothOperator(false, deposit, this);
             approvedOperators.push(myOperator);
             approvedOperatorsMapping[myOperator] = true;
