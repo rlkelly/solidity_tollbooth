@@ -33,6 +33,7 @@ contract Regulator is RegulatorI, Owned {
             address owner,
             uint deposit)
         public
+        fromOwner
         returns(TollBoothOperatorI newOperator) {
             TollBoothOperator myOperator = new TollBoothOperator(false, deposit, this);
             approvedOperators.push(myOperator);
