@@ -12,14 +12,14 @@ contract Regulator is RegulatorI, Owned {
     mapping(address => uint) vehicleRegistry;
 
     function setVehicleType(address vehicle, uint vehicleType)
-    public
-    fromOwner
-    returns(bool success) {
-      require(vehicleRegistry[vehicle] != vehicleType);
-      require(vehicle != 0x0);
-      vehicleRegistry[vehicle] = vehicleType;
-      LogVehicleTypeSet(msg.sender, vehicle, vehicleType);
-      return true;
+        public
+        fromOwner
+        returns(bool success) {
+          require(vehicleRegistry[vehicle] != vehicleType);
+          require(vehicle != 0x0);
+          vehicleRegistry[vehicle] = vehicleType;
+          LogVehicleTypeSet(msg.sender, vehicle, vehicleType);
+          return true;
     }
 
     function getVehicleType(address vehicle)
